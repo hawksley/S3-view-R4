@@ -23,19 +23,17 @@
  *
  */
 THREE.VREffect = function ( renderer, done ) {
-	var cameraCenter = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.2, 25);
+
 	var cameraLeft = new THREE.PerspectiveCamera();
 	var cameraRight = new THREE.PerspectiveCamera();
-	var phoneVR = new PhoneVR();
 
 	this._renderer = renderer;
-	this.stereoMode = false;
-	this.flatMode = true;
 
 	this._init = function() {
 		var self = this;
 
 		// default some stuff for mobile VR
+		self.phoneVR = new PhoneVR();
 		self.leftEyeTranslation = { x: -0.03200000151991844, y: -0, z: -0, w: 0 };
 		self.rightEyeTranslation = { x: 0.03200000151991844, y: -0, z: -0, w: 0 };
 		self.leftEyeFOV = { upDegrees: 53.04646464878503, rightDegrees: 47.52769258067174, downDegrees: 53.04646464878503, leftDegrees: 46.63209579904155 };
@@ -66,8 +64,6 @@ THREE.VREffect = function ( renderer, done ) {
 					self.rightEyeTranslation = parametersRight.eyeTranslation;
 					self.leftEyeFOV = parametersLeft.recommendedFieldOfView;
 					self.rightEyeFOV = parametersRight.recommendedFieldOfView;
-
-					this.stereoMode = true;
 					break; // We keep the first we encounter
 				}
 			}
@@ -87,15 +83,23 @@ THREE.VREffect = function ( renderer, done ) {
 		var renderer = this._renderer;
 		var vrHMD = this._vrHMD;
 		renderer.enableScissorTest( false );
-
-		if (this.stereoMode) {
-			this.renderStereo.apply(this, arguments);
-		} else {
-			this.renderMono.apply(this, arguments);
+		// VR render mode if HMD is available
+		if ( vrHMD ) {
+			this.renderStereo.apply( this, arguments );
+			return;
 		}
+
+		if (this.phoneVR.deviceAlpha !== null) { //default to stereo render for devices with orientation sensor, like mobile
+			this.renderStereo.apply( this, arguments );
+			return;
+		}
+
+		// Regular render mode if not HMD
+		renderer.render.apply( this._renderer, arguments );
 	};
 
 	this.renderStereo = function( scene, camera, renderTarget, forceClear ) {
+
 		var leftEyeTranslation = this.leftEyeTranslation;
 		var rightEyeTranslation = this.rightEyeTranslation;
 		var renderer = this._renderer;
@@ -128,43 +132,7 @@ THREE.VREffect = function ( renderer, done ) {
 		renderer.setViewport( eyeDivisionLine, 0, eyeDivisionLine, rendererHeight );
 		renderer.setScissor( eyeDivisionLine, 0, eyeDivisionLine, rendererHeight );
 		renderer.render( scene, cameraRight );
-	};
 
-	this.renderMono = function( scene, camera, renderTarget, forceClear ) {
-		var renderer = this._renderer;
-		var rendererWidth = renderer.domElement.width / renderer.devicePixelRatio;
-		var rendererHeight = renderer.domElement.height / renderer.devicePixelRatio;
-
-		if (this.flatMode) {
-			this.renderFlat.apply(this, arguments);
-			return;
-		}
-
-		renderer.enableScissorTest( true );
-		renderer.clear();
-
-		if ( camera.parent === undefined ) {
-			camera.updateMatrixWorld();
-		}
-
-		cameraCenter.aspect = rendererWidth/rendererHeight;
-		cameraCenter.updateProjectionMatrix();
-		camera.matrixWorld.decompose( cameraCenter.position, cameraCenter.quaternion, cameraCenter.scale );
-
-		renderer.setViewport( 0, 0, rendererWidth, rendererHeight );
-		renderer.setScissor( 0, 0, rendererWidth, rendererHeight );
-		renderer.render( scene, cameraCenter );
-	};
-
-	this.renderFlat = function( scene, camera, renderTarget, forceClear ) {
-		var renderer = this._renderer;
-		var rendererWidth = renderer.domElement.width / renderer.devicePixelRatio;
-		var rendererHeight = renderer.domElement.height / renderer.devicePixelRatio;
-		renderer.setViewport( 0, 0, rendererWidth, rendererHeight );
-
-		renderer.clear();
-
-		renderer.render.apply( this._renderer, arguments );
 	};
 
 	this.setSize = function( width, height ) {

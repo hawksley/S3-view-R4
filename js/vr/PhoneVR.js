@@ -9,8 +9,6 @@ function PhoneVR() {
     this.deviceGamma = null;
     this.deviceBeta = null;
 
-    this.lastQuaternion = null;
-
     window.addEventListener('deviceorientation', function(orientation) {
         this.deviceAlpha = orientation.alpha;
         this.deviceGamma = orientation.gamma;
@@ -43,27 +41,14 @@ PhoneVR.prototype.rotationQuat = function() {
     var y = cX * sY * cZ + sX * cY * sZ;
     var z = cX * cY * sZ + sX * sY * cZ;
 
-    var deviceQuaternion = quat.fromValues(x, y, z, w);
-
-    // Implement lift from SO(3) to S^3
-
-    if(this.lastQuaternion !== null){
-        var difference = [];
-        var deviceQuaternionInverse = [];
-        quat.invert(deviceQuaternionInverse, deviceQuaternion);
-        quat.multiply(difference, this.lastQuaternion, deviceQuaternionInverse);
-        if(difference[3] < 0.0){
-            quat.scale(deviceQuaternion, deviceQuaternion, -1);
-        }
-    }
-    this.lastQuaternion = deviceQuaternion;
+    var deviceQuaternion = new THREE.Quaternion(x, y, z, w);
 
     // Correct for the screen orientation.
     var screenOrientation = (this.getScreenOrientation() * degtorad)/2;
-    var screenTransform = [0, 0, -Math.sin(screenOrientation), Math.cos(screenOrientation)];
+    var screenTransform = new THREE.Quaternion(0, 0, -Math.sin(screenOrientation), Math.cos(screenOrientation));
 
-    var deviceRotation = quat.create();
-    quat.multiply(deviceRotation, deviceQuaternion, screenTransform);
+    var deviceRotation = new THREE.Quaternion();
+    deviceRotation.multiplyQuaternions(deviceQuaternion, screenTransform);
 
     // deviceRotation is the quaternion encoding of the transformation
     // from camera coordinates to world coordinates.  The problem is that
@@ -73,14 +58,9 @@ PhoneVR.prototype.rotationQuat = function() {
     // To fix the mismatch, we need to fix this.  We'll arbitrarily choose
     // North to correspond to -z (the default camera direction).
     var r22 = Math.sqrt(0.5);
-    quat.multiply(deviceRotation, quat.fromValues(-r22, 0, 0, r22), deviceRotation);
+    deviceRotation.multiplyQuaternions(new THREE.Quaternion(-r22, 0, 0, r22), deviceRotation);
 
-    var formattedOrientation = {};
-    formattedOrientation.x = deviceRotation[0];
-    formattedOrientation.y = deviceRotation[1];
-    formattedOrientation.z = deviceRotation[2];
-    formattedOrientation.w = deviceRotation[3];
-    return formattedOrientation;
+    return deviceRotation;
 }
 
 PhoneVR.prototype.getScreenOrientation = function() {
