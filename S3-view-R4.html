@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<!--
+
+Explore and nom objects in true 4-dimensional vision.
+
+By Henry Segerman, Vi Hart, and Andrea Hawksley, and probably some other people
+
+http://www.segerman.org/
+http://vihart.com
+https://github.com/hawksley
+
+https://github.com/MozVR/vr-web-examples/tree/master/threejs-vr-boilerplate
+http://threejs.org
+
+-->
+
+<html lang="en">
+<head>
+    <title>HYPERHYPERNOM</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+    body {
+        background-color: #000;
+        color: #fff;
+        margin: 0px;
+        padding: 0;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    </style>
+</head>
+
+<body>
+    <audio id='nom1' src="media/nom1.ogg"></audio>
+    <audio id='nom2' src="media/nom2.ogg"></audio>
+    <audio id='nom3' src="media/nom3.ogg"></audio>
+    <audio id='nom4' src="media/nom4.ogg"></audio>
+    <audio id='nom5' src="media/nom5.ogg"></audio>
+    <audio id='win' src="media/win.ogg"></audio>
+</body>
+
+<!--
+three.js 3d library
+-->
+<script src="js/lib/three.min.js"></script>
+<script src="js/lib/threex.dynamictexture.js"></script>
+
+<!--
+library for fast quaternion rotation
+-->
+<script src="js/lib/gl-matrix.js"></script>
+
+<script src="js/sphMath.js"></script>
+
+<!--
+VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
+-->
+<script src="js/vr/PhoneVR.js"></script>
+<script src="js/vr/VRControlsHyperNom.js"></script>
+
+<!--
+VREffect.js handles stereo camera setup and rendering.
+-->
+<script src="js/vr/VREffect.js"></script>
+
+
+<!-- Quaternions for the centers of the cells -->
+<!-- <script src="js/centers_600_cell.js"></script> -->
+
+<script src="js/loaders/OBJLoader.js"></script>
+
+
+<script type="x-shader/x-vertex" id="vertexShader">
+// This shader moves vertices around
+
+vec3 stereoProj( in vec4 p )
+{
+    float d = 1.0 - p.w;
+    return vec3( p.x/d, p.y/d, p.z/d );
+}
+
+vec4 invStereoProj( in vec3 p )
+{
+    float sumSq = p.x*p.x + p.y*p.y + p.z*p.z;
+    float d = 1.0 + sumSq;
+    return vec4( 2*p.x/d, 2*p.y/d, 2*p.z/d, (-1.0 + sumSq)/d );
+}
+
+// input
+// uniform float time; // global time in seconds
+// uniform int fogType; // which type of fog to use
+// uniform vec2 mousePos;
+
+uniform float objectScale; //scale object by this
+uniform vec4 objectPosn; //location of object in R4
+vec4 userPosn; //location of user is in R4
+
+// Hopf fibration coloring
+// returns a color based on the 4D normal
+vec3 HopfColor( in vec4 nBase )  
+{
+    /////////first rotate the 4D normal to a space aligned with the polychoron
+    // vec4 n = HopfColorMatrix * nBase;
+
+    vec4 n = nBase;
+    // compute the color
+
+    float x = n.x;
+    float y = n.y;
+    float u = n.z;
+    float v = n.w;
+
+    float r = 2. * (u*x + v*y);
+    float g = 2. * (u*y - v*x);
+    float b = x*x + y*y - u*u - v*v;
+
+    /// first two coords are 2*z*conj(w), where z = x+iy, w = u+iv
+
+    /// rotate [0,0,-1] to [-1,-1,-1]/sqrt(3)
+
+    mat3 RotDownToDiag = mat3( vec3(0.707107, -0.707107, 0.),       ///// input columns not rows?!?!?!
+    vec3(0.408248, 0.408248, -0.816497),  //Because line n+3 is RotDownToDiag*newCol, not newCol*RotDownToDiag.
+    vec3(0.57735, 0.57735, 0.57735) );    //This basically lets the shader do matrix multiplication via dot products, which is relatively efficient.
+    vec3 newCol = vec3(r,g,b);
+
+    newCol = RotDownToDiag * newCol;
+
+    return vec3(newCol.x*0.5 + 0.5,newCol.y*0.5 + 0.5,newCol.z*0.5 + 0.5);
+}
+
+// output
+varying vec3 vColor; // this shader computes the color of each vertex
+
+// this gets called once per vertex of the monkey mesh (and numCells times since there are numCells monkeys)
+void main()
+{
+    // inputs: 
+    // vec3 position, is position of the vertex on the mesh in R3
+    // vec4 objectPosition, is how object is moved
+    // float objectScale, is radius of the S3 this object is circumscribed in
+    // vec4 userPosn, is where the user is in R4
+    
+    vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
+    vec4 localR4posn = invStereoProj( R3posn );
+    vec4 scaledR4posn = objectScale * localR4posn;
+
+    // will rotate the object here
+
+    vec4 globalR4posn = scaledR4posn + objectPosn;
+
+    // will modify by rotation of the user here
+
+    vec4 userRelativeR4posn = globalR4posn - userPosn;
+
+    vec3 pos3 = stereoProj( normalize( userRelativeR4posn ) ); // position in retina space
+
+    // There is an issue with moving normal vectors from the mesh up to R4. The normals are normals to
+    // 2D faces, which are codimension 2 in R4. It isn't clear that these should even have colours in
+    // R4, given that they are eventually measure zero in S3. The 3D cells of a polychoron should have
+    // colour, but the 2D cells between 3D cells shouldn't. We have to do something though. Perhaps
+    // the correct thing to do is average the colours of the two neighbouring 3D cells. But for now, let's
+    // just use the position vector as the normal vector, pretending that the cell has been radially projected
+    // onto S3 for shading purposes. We ignore the normal coming from the 3D mesh
+
+    vec3 vColor = HopfColor(localR4posn);
+
+    // fog: colour should drop off as the inverse cube of the distance from the user...
+
+    float dist = length( userRelativeR4posn ) ;
+
+    // float invCubeDist = 1.0/( dist*dist*dist ); // ...but this is probably way too fast a drop off in brightness
+
+    float fogScale = 1.0;
+    if( dist > 1.0 ){
+        fogScale = 1.0/dist;
+    }
+
+    vColor *= fogScale; 
+
+    // take the final 3D position and project it onto the screen
+    // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
+    // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.7,-2.3), 1.0 );
+    gl_Position = modelViewMatrix * vec4( pos3 , 1.0 ); //truncate before the projectionMatrix transform (continued on line 253)
+
+    //Okay, now a slightly tricky thing:
+    //The camera's going to cull any vertices that are closer than 0.2, or further away than 25, from the camera.
+    //(in practice, this seems to be slightly different. I'm not sure why.)
+    //When this happens, it creates the black triangle of death, which pulls the viewer out of the virtual reality.
+    //To get around this, we're going to flatten out each vertex just before it reaches 0.2 or 25, moving it to where it would be.
+    //So, essentially, this is like replacing actual stars with a correctly painted planetarium.
+    //In case there's some weird z-layering going on, we're going to map -0.3,0  to -0.3, -0.2, preserving order.
+
+    float oldz=gl_Position.z;
+
+    if(oldz>-0.3 && oldz<0.0){
+        //map [-0.3, 0.0] to [-0.3,-0.2]
+        float newz=(oldz*0.3333333 - 0.2);
+        gl_Position.x=gl_Position.x*newz/(oldz);
+        gl_Position.y=gl_Position.y*newz/(oldz);
+        gl_Position.z=newz;
+        gl_Position.w=1.0;
+    }
+    gl_Position=projectionMatrix * gl_Position;
+}
+
+</script>
+
+
+<script type="x-shader/x-vertex" id="fragmentShader">
+// this gets called once per pixel
+varying vec3 vColor;
+void main()
+{
+    // just use the color we computed and assign it to this pixel
+    gl_FragColor = vec4( vColor, 1. );
+}
+</script>
+
+<script type="text/javascript" id="mainCode" src="js/hypernom.js"></script>
+</html>
+
+
