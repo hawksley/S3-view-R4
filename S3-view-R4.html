@@ -53,13 +53,13 @@ library for fast quaternion rotation
 -->
 <script src="js/lib/gl-matrix.js"></script>
 
-<script src="js/sphMath.js"></script>
+<script src="js/lib/sphMath.js"></script>
 
 <!--
 VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
 -->
 <script src="js/vr/PhoneVR.js"></script>
-<script src="js/vr/VRControlsHyperNom.js"></script>
+<script src="js/vr/VRControls.js"></script>
 
 <!--
 VREffect.js handles stereo camera setup and rendering.
@@ -100,7 +100,7 @@ vec4 userPosn; //location of user is in R4
 
 // Hopf fibration coloring
 // returns a color based on the 4D normal
-vec3 HopfColor( in vec4 nBase )  
+vec3 HopfColor( in vec4 nBase )
 {
     /////////first rotate the 4D normal to a space aligned with the polychoron
     // vec4 n = HopfColorMatrix * nBase;
@@ -137,12 +137,12 @@ varying vec3 vColor; // this shader computes the color of each vertex
 // this gets called once per vertex of the monkey mesh (and numCells times since there are numCells monkeys)
 void main()
 {
-    // inputs: 
+    // inputs:
     // vec3 position, is position of the vertex on the mesh in R3
     // vec4 objectPosition, is how object is moved
     // float objectScale, is radius of the S3 this object is circumscribed in
     // vec4 userPosn, is where the user is in R4
-    
+
     vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
     vec4 localR4posn = invStereoProj( R3posn );
     vec4 scaledR4posn = objectScale * localR4posn;
@@ -178,7 +178,7 @@ void main()
         fogScale = 1.0/dist;
     }
 
-    vColor *= fogScale; 
+    vColor *= fogScale;
 
     // take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
@@ -219,7 +219,5 @@ void main()
 }
 </script>
 
-<script type="text/javascript" id="mainCode" src="js/hypernom.js"></script>
+<script type="text/javascript" id="mainCode" src="js/webVR.js"></script>
 </html>
-
-
