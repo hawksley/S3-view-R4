@@ -86,7 +86,7 @@ vec4 invStereoProj( in vec3 p )
 {
     float sumSq = p.x*p.x + p.y*p.y + p.z*p.z;
     float d = 1.0 + sumSq;
-    return vec4( 2*p.x/d, 2*p.y/d, 2*p.z/d, (-1.0 + sumSq)/d );
+    return vec4( 2.*p.x/d, 2.*p.y/d, 2.*p.z/d, (-1.0 + sumSq)/d );
 }
 
 // input
@@ -96,7 +96,7 @@ vec4 invStereoProj( in vec3 p )
 
 uniform float objectScale; //scale object by this
 uniform vec4 objectPosn; //location of object in R4
-vec4 userPosn; //location of user is in R4
+uniform vec4 userPosn; //location of user is in R4
 
 // Hopf fibration coloring
 // returns a color based on the 4D normal
