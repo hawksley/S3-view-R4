@@ -139,7 +139,7 @@ void main()
 {
     // inputs:
     // vec3 position, is position of the vertex on the mesh in R3
-    // vec4 objectPosition, is how object is moved
+    // vec4 objectPosn, is how object is moved
     // float objectScale, is radius of the S3 this object is circumscribed in
     // vec4 userPosn, is where the user is in R4
 
@@ -165,7 +165,7 @@ void main()
     // just use the position vector as the normal vector, pretending that the cell has been radially projected
     // onto S3 for shading purposes. We ignore the normal coming from the 3D mesh
 
-    vec3 vColor = HopfColor(localR4posn);
+    vColor = HopfColor(localR4posn);
 
     // fog: colour should drop off as the inverse cube of the distance from the user...
 

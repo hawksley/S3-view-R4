@@ -15,6 +15,7 @@ function init() {
 
   //Create a three.js camera
   camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 2, 10000 );
+  camera.position.z = 2;
   scene.add(camera);
 
   //Apply VR headset positional data to camera.
@@ -67,15 +68,15 @@ function init() {
       },
       modelScale: {
         type: "f",
-        value: 1.0
+        value: 2.0
       },
       objectScale: {
         type: "f",
-        value: 1.0
+        value: 10.0
       },
       objectPosn: {
         type: "v4",
-        value: new THREE.Vector4( 0, 0, -2, 0 )
+        value: new THREE.Vector4( 0, 0, 0, 0 )
       },
       userPosn: {
         type: "v4",
@@ -85,7 +86,11 @@ function init() {
     vertexShader: document.getElementById('vertexShader').textContent,
     fragmentShader: document.getElementById('fragmentShader').textContent
   });
-  materialBase.side = THREE.FrontSide;
+  materialBase.side = THREE.DoubleSide;
+  // materialBase.vertexColors = THREE.VertexColors;
+
+  var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+  scene.add( light );
 
   loadStuff();
 }
@@ -100,15 +105,11 @@ function loadStuff() {
 
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
-        var material = new THREE.MeshNormalMaterial();
-        material.side = THREE.DoubleSide;
-
-        child.material = materialBase.clone();
-
-        // child.material = material;
-        // child.position.z = -2;
-
+        child.material = materialBase;
+        child.position.z = -2;
         child.frustumCulled = false;
+
+        // scene.add(child);
       }
     });
 
