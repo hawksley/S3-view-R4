@@ -106,6 +106,7 @@ function loadStuff() {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
         child.material.uniforms.objectPosn.value.y = 10;
+        child.material.uniforms.userPosn.value = globalUserPosn;
         child.frustumCulled = false;
       }
     });
@@ -119,6 +120,7 @@ function loadStuff() {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
         child.material.uniforms.objectPosn.value.y = -10;
+        child.material.uniforms.userPosn.value = globalUserPosn;
         child.frustumCulled = false;
       }
     });
