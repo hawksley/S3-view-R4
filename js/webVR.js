@@ -1,6 +1,6 @@
 "use strict";
 
-var materialBase, renderer, scene, camera, controls, effect, projector;
+var materialBase, globalUserPosn, renderer, scene, camera, controls, effect, projector;
 
 function init() {
   // Setup three.js WebGL renderer
@@ -29,6 +29,8 @@ function init() {
 
   // initialize object to perform world/screen calculations
 	projector = new THREE.Projector();
+
+  globalUserPosn = new THREE.Vector4( 0, 0, 0, 0 );
 
   // material for the cells is a shader
   materialBase = new THREE.ShaderMaterial({
@@ -80,7 +82,7 @@ function init() {
       },
       userPosn: {
         type: "v4",
-        value: new THREE.Vector4( 0, 0, 0, 0 )
+        value: globalUserPosn
       }
     },
     vertexShader: document.getElementById('vertexShader').textContent,
@@ -106,7 +108,6 @@ function loadStuff() {
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase;
-        child.position.z = -2;
         child.frustumCulled = false;
 
         // scene.add(child);

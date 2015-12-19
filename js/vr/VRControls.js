@@ -32,13 +32,13 @@ THREE.VRControls = function ( camera, speed, done ) {
 			} else if (self.isArrows && control.index <= 5) {
 				self.manualMoveRate[control.index - 3] += sign * control.sign;
 			} else if (control.index == 6) {
-				materialBase.uniforms.userPosn.value.x += 0.5*control.sign;
+				globalUserPosn.x += 0.5*control.sign;
 			} else if (control.index == 7) {
-				materialBase.uniforms.userPosn.value.y += 0.5*control.sign;
+				globalUserPosn.y += 0.5*control.sign;
 			} else if (control.index == 8) {
-				materialBase.uniforms.userPosn.value.z += 0.5*control.sign;
+				globalUserPosn.z += 0.5*control.sign;
 			} else if (control.index == 9) {
-				materialBase.uniforms.userPosn.value.w += 0.5*control.sign;
+				globalUserPosn.w += 0.5*control.sign;
 			}
 		}
 
