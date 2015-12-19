@@ -104,8 +104,8 @@ function loadStuff() {
 
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
-        child.material = materialBase;
-        child.material.uniforms.objectPosn.value.y = 1;
+        child.material = materialBase.clone();
+        child.material.uniforms.objectPosn.value.y = 10;
         child.frustumCulled = false;
       }
     });
@@ -117,8 +117,8 @@ function loadStuff() {
     var resultingObj2 = object.clone(); // if you actually wanted all the same, use an array and looping, and don't load a second time
     resultingObj2.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
-        child.material = materialBase;
-        child.material.uniforms.objectPosn.value.y = -1;
+        child.material = materialBase.clone();
+        child.material.uniforms.objectPosn.value.y = -10;
         child.frustumCulled = false;
       }
     });
