@@ -68,7 +68,7 @@ function init() {
         type: "m3",
         value: new THREE.Matrix3().set( 0, 0, 0, 0, 0, 0, 0, 0, 0 )
       },
-      modelScale: {
+      modelScale: {  //currently unused
         type: "f",
         value: 2.0
       },
@@ -106,7 +106,8 @@ function loadStuff() {
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
-        child.material.uniforms.objectPosn.value.y = 10;
+        child.material.uniforms.objectPosn.value.y = 20;
+        child.material.uniforms.objectPosn.value.x = 5.5;
         child.material.uniforms.userPosn.value = globalUserPosn;
         child.frustumCulled = false;
       }
@@ -120,7 +121,8 @@ function loadStuff() {
     resultingObj2.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
-        child.material.uniforms.objectPosn.value.y = -10;
+        child.material.uniforms.objectPosn.value.y = 20;
+        child.material.uniforms.objectPosn.value.x = -5.5;
         child.material.uniforms.userPosn.value = globalUserPosn;
         child.frustumCulled = false;
       }
