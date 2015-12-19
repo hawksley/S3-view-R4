@@ -91,9 +91,6 @@ function init() {
   materialBase.side = THREE.DoubleSide;
   // materialBase.vertexColors = THREE.VertexColors;
 
-  var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-  scene.add( light );
-
   loadStuff();
 }
 
@@ -108,13 +105,24 @@ function loadStuff() {
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase;
+        child.material.uniforms.objectPosn.value.y = 1;
         child.frustumCulled = false;
-
-        // scene.add(child);
       }
     });
 
     scene.add(resultingObj);
+  });
+
+  loader.load("media/hypercube_2_skeleton.obj", function (object) { // just an example of how you could make multiple
+    var resultingObj2 = object.clone(); // if you actually wanted all the same, use an array and looping, and don't load a second time
+    resultingObj2.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        child.material = materialBase;
+        child.material.uniforms.objectPosn.value.y = -1;
+        child.frustumCulled = false;
+      }
+    });
+    scene.add(resultingObj2);
   });
 }
 
