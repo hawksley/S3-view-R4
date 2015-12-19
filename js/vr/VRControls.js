@@ -31,6 +31,14 @@ THREE.VRControls = function ( camera, speed, done ) {
 				self.manualRotateRate[control.index] += sign * control.sign;
 			} else if (self.isArrows && control.index <= 5) {
 				self.manualMoveRate[control.index - 3] += sign * control.sign;
+			} else if (control.index == 6) {
+				materialBase.uniforms.userPosn.value.x += 0.5*control.sign;
+			} else if (control.index == 7) {
+				materialBase.uniforms.userPosn.value.y += 0.5*control.sign;
+			} else if (control.index == 8) {
+				materialBase.uniforms.userPosn.value.z += 0.5*control.sign;
+			} else if (control.index == 9) {
+				materialBase.uniforms.userPosn.value.w += 0.5*control.sign;
 			}
 		}
 
@@ -122,7 +130,16 @@ THREE.VRControls = function ( camera, speed, done ) {
 		37 : {index: 4, sign: 1, active: 0}, // left
 		39 : {index: 4, sign: -1, active: 0},   // right
 		191 : {index: 5, sign: 1, active: 0}, // fwd slash
-		222 : {index: 5, sign: -1, active: 0}   // single quote
+		222 : {index: 5, sign: -1, active: 0},   // single quote
+
+		73 : {index: 7, sign: -1, active: 0}, // i
+		75 : {index: 7, sign: 1, active: 0}, // k
+		85 : {index: 8, sign: -1, active: 0}, // u
+		74 : {index: 8, sign: 1, active: 0}, // j
+		79 : {index: 9, sign: -1, active: 0},  // o
+		76 : {index: 9, sign: 1, active: 0}, // l
+		89 : {index: 6, sign: -1, active: 0},  // y
+		72 : {index: 6, sign: 1, active: 0}  // h
   };
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
@@ -215,6 +232,8 @@ THREE.VRControls = function ( camera, speed, done ) {
 
 			if (state.position !== null) {
 				camera.position.copy( state.position ).multiplyScalar( this.scale );
+			} else {
+				camera.position = camera.position.add(offset);
 			}
 		}
 	};
