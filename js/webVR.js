@@ -94,7 +94,8 @@ function init() {
   loadStuff();
 }
 
-var modelFileName = "media/hypercube_2_skeleton.obj";
+// var modelFileName = "media/hypercube_2-skeleton_1.obj";
+var modelFileName = "media/hypercube_2-skeleton_10.obj";
 var resultingObj;
 function loadStuff() {
   var manager = new THREE.LoadingManager();
@@ -105,6 +106,7 @@ function loadStuff() {
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
+        child.material.side = THREE.DoubleSide;
         child.material.uniforms.objectPosn.value.y = 10;
         child.material.uniforms.userPosn.value = globalUserPosn;
         child.frustumCulled = false;
@@ -114,7 +116,7 @@ function loadStuff() {
     scene.add(resultingObj);
   });
 
-  loader.load("media/hypercube_2_skeleton.obj", function (object) { // just an example of how you could make multiple
+  loader.load("media/hypercube_2-skeleton_1.obj", function (object) { // just an example of how you could make multiple
     var resultingObj2 = object.clone(); // if you actually wanted all the same, use an array and looping, and don't load a second time
     resultingObj2.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
