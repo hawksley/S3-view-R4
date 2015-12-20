@@ -180,13 +180,14 @@ void main()
 
     // float invCubeDist = 1.0/( dist*dist*dist ); // ...but this is probably way too fast a drop off in brightness
 
-    // temporarily comment out fog because it is so dark
-    // float fogScale = 1.0;
-    // if( dist > 1.0 ){
-    //     fogScale = 1.0/dist;
-    // }
-    //
-    // vColor *= fogScale;
+    float fogOnDistance = 20.0; //full brightness before 20 units away from viewer in R4
+    //also changes how quickly the fog makes things darker
+    float fogScale = 1.0;
+    if( dist > fogOnDistance ){
+        fogScale = fogOnDistance/dist;
+    }
+    
+    vColor *= fogScale;
 
     // take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );
