@@ -86,7 +86,7 @@ vec4 invStereoProj( in vec3 p )
 {
     float sumSq = p.x*p.x + p.y*p.y + p.z*p.z;
     float d = 1.0 + sumSq;
-    return vec4( 2.*p.xyz/d, (-1.0 + sumSq)/d );
+    return vec4( 2.0*p.xyz/d, (-1.0 + sumSq)/d );
 }
 
 // input
@@ -144,8 +144,15 @@ void main()
     // vec4 userPosn, is where the user is in R4
 
     vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
-    vec4 localR4posn = invStereoProj( R3posn );
-    vec4 scaledR4posn = objectScale * localR4posn;
+    vec4 localR4posn = invStereoProj( R3posn ); //position on S3... 
+    //now we horribly hackily project points that are not vertices back to the hyperplanes they're supposed to be in
+    vec4 foo = abs(localR4posn);
+
+    float maxcoord = max(foo.x, max(foo.y, max(foo.z, foo.w)));
+    //rescale so that maxcoord is 1/2, which is what it is for hypercube inscribed in S3
+    //this gets combined with the objectScale in the next line
+
+    vec4 scaledR4posn = (objectScale/(2.0*maxcoord)) * localR4posn;
 
     // will rotate the object here
 
@@ -173,13 +180,14 @@ void main()
 
     // float invCubeDist = 1.0/( dist*dist*dist ); // ...but this is probably way too fast a drop off in brightness
 
-    // temporarily comment out fog because it is so dark
-    // float fogScale = 1.0;
-    // if( dist > 1.0 ){
-    //     fogScale = 1.0/dist;
-    // }
-    //
-    // vColor *= fogScale;
+    float fogOnDistance = 20.0; //full brightness before 20 units away from viewer in R4
+    //also changes how quickly the fog makes things darker
+    float fogScale = 1.0;
+    if( dist > fogOnDistance ){
+        fogScale = fogOnDistance/dist;
+    }
+    
+    vColor *= fogScale;
 
     // take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );

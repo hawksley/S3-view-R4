@@ -14,7 +14,7 @@ function init() {
   scene = new THREE.Scene();
 
   //Create a three.js camera
-  camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 2, 10000 );
+  camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 0.001, 10000 );
   camera.position.z = 2;
   scene.add(camera);
 
@@ -68,7 +68,7 @@ function init() {
         type: "m3",
         value: new THREE.Matrix3().set( 0, 0, 0, 0, 0, 0, 0, 0, 0 )
       },
-      modelScale: {
+      modelScale: {  //currently unused
         type: "f",
         value: 2.0
       },
@@ -94,9 +94,9 @@ function init() {
   loadStuff();
 }
 
-var modelFileName = "media/hypercube_2_skeleton.obj";
-var arraySize = 3;
-var hyperCubeArray = new Array(Math.pow(arraySize, 4));
+// var modelFileName = "media/hypercube_2-skeleton_1.obj";
+var modelFileName = "media/hypercube_2-skeleton_10.obj";
+var resultingObj;
 function loadStuff() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
