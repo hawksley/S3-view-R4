@@ -97,6 +97,7 @@ vec4 invStereoProj( in vec3 p )
 uniform float objectScale; //scale object by this
 uniform vec4 objectPosn; //location of object in R4
 uniform vec4 userPosn; //location of user is in R4
+uniform mat4 userOrientation; //rotation matrix of user in R4
 
 // Hopf fibration coloring
 // returns a color based on the 4D normal
@@ -159,8 +160,10 @@ void main()
     vec4 globalR4posn = scaledR4posn + objectPosn;
 
     // will modify by rotation of the user here
+    // userOrientation is perhaps the inverse of what you might think it is, don't want to
+    // be doing matrix inverses if we don't have to...
 
-    vec4 userRelativeR4posn = globalR4posn - userPosn;
+    vec4 userRelativeR4posn = userOrientation * (globalR4posn - userPosn);
 
     vec3 pos3 = stereoProj( normalize( userRelativeR4posn ) ); // position in retina space
 
@@ -228,5 +231,6 @@ void main()
 }
 </script>
 
-<script type="text/javascript" id="mainCode" src="js/webVR.js"></script>
+<!-- <script type="text/javascript" id="mainCode" src="js/webVR.js"></script> -->
+<script type="text/javascript" id="mainCode" src="js/webVR2.js"></script>
 </html>

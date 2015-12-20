@@ -33,17 +33,11 @@ THREE.VRControls = function ( camera, speed, done ) {
 				self.manualMoveRate[control.index - 3] += sign * control.sign;
 			} else if (control.index <= 9) {
 				self.manualR4MoveRate[control.index - 6] += sign * control.sign;
+			} else if (control.index <= 12) {
+				self.manualR4RotateRate[control.index - 10] += sign * control.sign;
 			}
 
-			// } else if (control.index == 6) {
-			// 	globalUserPosn.x += 0.5*control.sign;
-			// } else if (control.index == 7) {
-			// 	globalUserPosn.y += 0.5*control.sign;
-			// } else if (control.index == 8) {
-			// 	globalUserPosn.z += 0.5*control.sign;
-			// } else if (control.index == 9) {
-			// 	globalUserPosn.w += 0.5*control.sign;
-			// }
+
 		}
 
 		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
@@ -136,19 +130,29 @@ THREE.VRControls = function ( camera, speed, done ) {
 		191 : {index: 5, sign: 1, active: 0}, // fwd slash
 		222 : {index: 5, sign: -1, active: 0},   // single quote
 
-		73 : {index: 7, sign: -1, active: 0}, // i
-		75 : {index: 7, sign: 1, active: 0}, // k
-		85 : {index: 8, sign: -1, active: 0}, // u
-		74 : {index: 8, sign: 1, active: 0}, // j
-		79 : {index: 9, sign: -1, active: 0},  // o
-		76 : {index: 9, sign: 1, active: 0}, // l
-		89 : {index: 6, sign: -1, active: 0},  // y
-		72 : {index: 6, sign: 1, active: 0}  // h
+		73 : {index: 6, sign: -1, active: 0}, // i
+		75 : {index: 6, sign: 1, active: 0}, // k
+		85 : {index: 7, sign: -1, active: 0}, // u
+		74 : {index: 7, sign: 1, active: 0}, // j
+		79 : {index: 8, sign: -1, active: 0},  // o
+		76 : {index: 8, sign: 1, active: 0}, // l
+		// 89 : {index: 6, sign: -1, active: 0},  // y
+		// 72 : {index: 6, sign: 1, active: 0}  // h
+        80 : {index: 9, sign: -1, active: 0},  // p
+		186 : {index: 9, sign: 1, active: 0},  // ;
+
+		70 : {index: 10, sign: -1, active: 0},  // f
+		72 : {index: 10, sign: 1, active: 0}, // h
+		82 : {index: 11, sign: -1, active: 0},  // r
+		89 : {index: 11, sign: 1, active: 0},  // y
+		84 : {index: 12, sign: -1, active: 0},  // t
+		71 : {index: 12, sign: 1, active: 0}  // g
   };
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
 	this.manualMoveRate = new Float32Array([0, 0, 0]);
 	this.manualR4MoveRate = new Float32Array([0, 0, 0, 0]);
+	this.manualR4RotateRate = new Float32Array([0, 0, 0]); //only do 3 of 6 rotation dimensions in R4 
 
 	this.updateTime = 0;
 
@@ -200,12 +204,35 @@ THREE.VRControls = function ( camera, speed, done ) {
 
 		// if (this.isGamepad || this.isWASD) {
 		  var interval = (newTime - oldTime) * 0.001;
-		  var update = new THREE.Quaternion(this.manualRotateRate[0] * interval,
+		  var updateR3Rot = new THREE.Quaternion(this.manualRotateRate[0] * interval,
 		                               this.manualRotateRate[1] * interval,
 		                               this.manualRotateRate[2] * interval, 1.0);
-		  update.normalize();
-			manualRotation.multiplyQuaternions(manualRotation, update);
+		  updateR3Rot.normalize();
+		  manualRotation.multiplyQuaternions(manualRotation, updateR3Rot);
+
+		  var tx = this.manualR4RotateRate[0] * interval;
+		  var updateR4RotX = new THREE.Matrix4(Math.cos(tx),0.0,0.0,-Math.sin(tx),
+		  										0.0,1.0,0.0,0.0,
+		  										0.0,0.0,1.0,0.0,
+		  										Math.sin(tx),0.0,0.0,Math.cos(tx));
+		  var ty = this.manualR4RotateRate[1] * interval;
+		  var updateR4RotY = new THREE.Matrix4( 1.0,0.0,0.0,0.0,
+		  										0.0,Math.cos(ty),0.0,-Math.sin(ty),
+		  										0.0,0.0,1.0,0.0,
+		  										0.0,Math.sin(ty),0.0,Math.cos(ty));
+		  var tz = this.manualR4RotateRate[2] * interval;
+  		  var updateR4RotZ = new THREE.Matrix4( 1.0,0.0,0.0,0.0,
+  												0.0,1.0,0.0,0.0,
+  												0.0,0.0,Math.cos(tz),-Math.sin(tz),
+  												0.0,0.0,Math.sin(tz),Math.cos(tz));
 		// }
+		  globalUserOrientation = new THREE.Matrix4(0.0,1.0,0.0,0.0,
+		  										-1.0,0.0,0.0,0.0,
+		  										0.0,0.0,1.0,0.0,
+		  										0.0,0.0,0.0,1.0);
+		  // globalUserOrientation.multiply(updateR4RotX).multiply(updateR4RotY).multiply(updateR4RotZ);
+		  //order doesn't matter much here, will all be near identity
+
 
 		// if (this.isGamepad || this.isArrows) {
 			var offset = new THREE.Vector3();
