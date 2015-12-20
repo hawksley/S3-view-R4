@@ -31,15 +31,19 @@ THREE.VRControls = function ( camera, speed, done ) {
 				self.manualRotateRate[control.index] += sign * control.sign;
 			} else if (self.isArrows && control.index <= 5) {
 				self.manualMoveRate[control.index - 3] += sign * control.sign;
-			} else if (control.index == 6) {
-				globalUserPosn.x += 0.5*control.sign;
-			} else if (control.index == 7) {
-				globalUserPosn.y += 0.5*control.sign;
-			} else if (control.index == 8) {
-				globalUserPosn.z += 0.5*control.sign;
-			} else if (control.index == 9) {
-				globalUserPosn.w += 0.5*control.sign;
+			} else if (control.index <= 9) {
+				self.manualR4MoveRate[control.index - 6] += sign * control.sign;
 			}
+
+			// } else if (control.index == 6) {
+			// 	globalUserPosn.x += 0.5*control.sign;
+			// } else if (control.index == 7) {
+			// 	globalUserPosn.y += 0.5*control.sign;
+			// } else if (control.index == 8) {
+			// 	globalUserPosn.z += 0.5*control.sign;
+			// } else if (control.index == 9) {
+			// 	globalUserPosn.w += 0.5*control.sign;
+			// }
 		}
 
 		document.addEventListener('keydown', function(event) { key(event, 1); }, false);
@@ -144,6 +148,8 @@ THREE.VRControls = function ( camera, speed, done ) {
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
 	this.manualMoveRate = new Float32Array([0, 0, 0]);
+	this.manualR4MoveRate = new Float32Array([0, 0, 0, 0]);
+
 	this.updateTime = 0;
 
 	this.isGamepad = true;
@@ -208,6 +214,13 @@ THREE.VRControls = function ( camera, speed, done ) {
 							.add(getRightVector().multiplyScalar( interval * this.speed * this.manualMoveRate[1]))
 							.add(getUpVector().multiplyScalar( interval * this.speed * this.manualMoveRate[2]));
 			}
+
+			// why not use the same speed parameter for R4 as for R3, what could possibly go wrong?
+			globalUserPosn.x += interval * this.speed * this.manualR4MoveRate[0];
+			globalUserPosn.y += interval * this.speed * this.manualR4MoveRate[1];
+			globalUserPosn.z += interval * this.speed * this.manualR4MoveRate[2];
+			globalUserPosn.w += interval * this.speed * this.manualR4MoveRate[3];
+
 
 		// }
 
