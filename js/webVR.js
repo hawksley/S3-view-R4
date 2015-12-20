@@ -95,37 +95,44 @@ function init() {
 }
 
 var modelFileName = "media/hypercube_2_skeleton.obj";
-var resultingObj;
+var arraySize = 3;
+var hyperCubeArray = new Array(Math.pow(arraySize, 4));
 function loadStuff() {
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
   loader.load(modelFileName, function (object) {
-    resultingObj = object.clone();
+    for (var i = 0; i < hyperCubeArray.length; i++) {
+      hyperCubeArray[i] = object.clone();
 
-    resultingObj.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-        child.material = materialBase.clone();
-        child.material.uniforms.objectPosn.value.y = 10;
-        child.material.uniforms.userPosn.value = globalUserPosn;
-        child.frustumCulled = false;
-      }
-    });
+      hyperCubeArray[i].traverse(function (child) { // i%3= 0 1 2 0 1 2..., floor(i/3)%3=
+        if (child instanceof THREE.Mesh) {
+          child.material = materialBase.clone();
+          child.material.uniforms.objectPosn.value = new THREE.Vector4(
+            i%arraySize * 40,
+            Math.floor(i/arraySize)%arraySize * 40,
+            Math.floor(i/Math.pow(arraySize, 2))%arraySize * 40,
+            Math.floor(i/Math.pow(arraySize, 3))%arraySize * 40);
+          child.material.uniforms.userPosn.value = globalUserPosn;
+          child.frustumCulled = false;
+        }
+      });
 
-    scene.add(resultingObj);
+      scene.add(hyperCubeArray[i]);
+    }
   });
 
-  loader.load("media/hypercube_2_skeleton.obj", function (object) { // just an example of how you could make multiple
-    var resultingObj2 = object.clone(); // if you actually wanted all the same, use an array and looping, and don't load a second time
-    resultingObj2.traverse(function (child) {
-      if (child instanceof THREE.Mesh) {
-        child.material = materialBase.clone();
-        child.material.uniforms.objectPosn.value.y = -10;
-        child.material.uniforms.userPosn.value = globalUserPosn;
-        child.frustumCulled = false;
-      }
-    });
-    scene.add(resultingObj2);
-  });
+  // loader.load("media/hypercube_2_skeleton.obj", function (object) { // just an example of how you could make multiple
+  //   var resultingObj2 = object.clone(); // if you actually wanted all the same, use an array and looping, and don't load a second time
+  //   resultingObj2.traverse(function (child) {
+  //     if (child instanceof THREE.Mesh) {
+  //       child.material = materialBase.clone();
+  //       child.material.uniforms.objectPosn.value.y = -10;
+  //       child.material.uniforms.userPosn.value = globalUserPosn;
+  //       child.frustumCulled = false;
+  //     }
+  //   });
+  //   scene.add(resultingObj2);
+  // });
 }
 
 init();

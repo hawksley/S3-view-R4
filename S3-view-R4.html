@@ -79,14 +79,14 @@ VREffect.js handles stereo camera setup and rendering.
 vec3 stereoProj( in vec4 p )
 {
     float d = 1.0 - p.w;
-    return vec3( p.x/d, p.y/d, p.z/d );
+    return p.xyz/d;
 }
 
 vec4 invStereoProj( in vec3 p )
 {
     float sumSq = p.x*p.x + p.y*p.y + p.z*p.z;
     float d = 1.0 + sumSq;
-    return vec4( 2.*p.x/d, 2.*p.y/d, 2.*p.z/d, (-1.0 + sumSq)/d );
+    return vec4( 2.*p.xyz/d, (-1.0 + sumSq)/d );
 }
 
 // input
