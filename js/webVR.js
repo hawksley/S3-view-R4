@@ -14,7 +14,7 @@ function init() {
   scene = new THREE.Scene();
 
   //Create a three.js camera
-  camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 2, 10000 );
+  camera = new THREE.PerspectiveCamera( 110, window.innerWidth / window.innerHeight, 0.001, 10000 );
   camera.position.z = 2;
   scene.add(camera);
 
