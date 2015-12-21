@@ -111,8 +111,8 @@ function loadStuff() {
     resultingObj.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
-        child.material.uniforms.objectPosn.value.y = 20;
-        child.material.uniforms.objectPosn.value.x = 5.5;
+        child.material.uniforms.objectPosn.value.y = -20;
+        child.material.uniforms.objectPosn.value.x = 0;
         child.material.uniforms.userPosn.value = globalUserPosn;
         child.material.uniforms.userOrientation.value = globalUserOrientation;
         child.frustumCulled = false;
@@ -128,7 +128,7 @@ function loadStuff() {
       if (child instanceof THREE.Mesh) {
         child.material = materialBase.clone();
         child.material.uniforms.objectPosn.value.y = 20;
-        child.material.uniforms.objectPosn.value.x = -5.5;
+        child.material.uniforms.objectPosn.value.x = 0;
         child.material.uniforms.userPosn.value = globalUserPosn;
         child.material.uniforms.userOrientation.value = globalUserOrientation;
         child.frustumCulled = false;
@@ -140,7 +140,7 @@ function loadStuff() {
 
 init();
 
-setTimeout(function(){debugger;}, 3000);
+// setTimeout(function(){debugger;}, 3000);
 
 /*
 Request animation frame loop function

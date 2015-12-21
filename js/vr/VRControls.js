@@ -211,26 +211,27 @@ THREE.VRControls = function ( camera, speed, done ) {
 		  manualRotation.multiplyQuaternions(manualRotation, updateR3Rot);
 
 		  var tx = this.manualR4RotateRate[0] * interval;
-		  var updateR4RotX = new THREE.Matrix4(Math.cos(tx),0.0,0.0,-Math.sin(tx),
+		  var ty = this.manualR4RotateRate[1] * interval;
+		  var tz = this.manualR4RotateRate[2] * interval;
+		  var updateR4RotX = new THREE.Matrix4();
+		  var updateR4RotY = new THREE.Matrix4();
+		  var updateR4RotZ = new THREE.Matrix4();
+		  updateR4RotX.set( Math.cos(tx),0.0,0.0,-Math.sin(tx),
 		  										0.0,1.0,0.0,0.0,
 		  										0.0,0.0,1.0,0.0,
 		  										Math.sin(tx),0.0,0.0,Math.cos(tx));
-		  var ty = this.manualR4RotateRate[1] * interval;
-		  var updateR4RotY = new THREE.Matrix4( 1.0,0.0,0.0,0.0,
+		  
+		  updateR4RotY.set( 1.0,0.0,0.0,0.0,
 		  										0.0,Math.cos(ty),0.0,-Math.sin(ty),
 		  										0.0,0.0,1.0,0.0,
 		  										0.0,Math.sin(ty),0.0,Math.cos(ty));
-		  var tz = this.manualR4RotateRate[2] * interval;
-  		  var updateR4RotZ = new THREE.Matrix4( 1.0,0.0,0.0,0.0,
+  		  updateR4RotZ.set( 1.0,0.0,0.0,0.0,
   												0.0,1.0,0.0,0.0,
   												0.0,0.0,Math.cos(tz),-Math.sin(tz),
   												0.0,0.0,Math.sin(tz),Math.cos(tz));
-		// }
-		  globalUserOrientation = new THREE.Matrix4(0.0,1.0,0.0,0.0,
-		  										-1.0,0.0,0.0,0.0,
-		  										0.0,0.0,1.0,0.0,
-		  										0.0,0.0,0.0,1.0);
 		  // globalUserOrientation.multiply(updateR4RotX).multiply(updateR4RotY).multiply(updateR4RotZ);
+		  globalUserOrientation.multiplyMatrices( updateR4RotX.multiply(updateR4RotY).multiply(updateR4RotZ), globalUserOrientation); //multiply on the left
+
 		  //order doesn't matter much here, will all be near identity
 
 
