@@ -116,6 +116,8 @@ THREE.VRControls = function ( camera, speed, done ) {
 	this.manualRotation = new THREE.Quaternion();
 
 	this.manualControls = {
+
+		//R3 rotation commands
 		65 : {index: 1, sign: 1, active: 0},  // a
 		68 : {index: 1, sign: -1, active: 0}, // d
 		87 : {index: 0, sign: 1, active: 0},  // w
@@ -123,6 +125,7 @@ THREE.VRControls = function ( camera, speed, done ) {
 		81 : {index: 2, sign: -1, active: 0}, // q
 		69 : {index: 2, sign: 1, active: 0},  // e
 
+		//R3 strafe commands
 		38 : {index: 3, sign: -1, active: 0},  // up
 		40 : {index: 3, sign: 1, active: 0}, // down
 		37 : {index: 4, sign: 1, active: 0}, // left
@@ -130,17 +133,17 @@ THREE.VRControls = function ( camera, speed, done ) {
 		191 : {index: 5, sign: 1, active: 0}, // fwd slash
 		222 : {index: 5, sign: -1, active: 0},   // single quote
 
-		73 : {index: 6, sign: -1, active: 0}, // i
-		75 : {index: 6, sign: 1, active: 0}, // k
-		85 : {index: 7, sign: -1, active: 0}, // u
-		74 : {index: 7, sign: 1, active: 0}, // j
-		79 : {index: 8, sign: -1, active: 0},  // o
-		76 : {index: 8, sign: 1, active: 0}, // l
-		// 89 : {index: 6, sign: -1, active: 0},  // y
-		// 72 : {index: 6, sign: 1, active: 0}  // h
-        80 : {index: 9, sign: -1, active: 0},  // p
-		186 : {index: 9, sign: 1, active: 0},  // ;
+		//R4 global position commands
+		90 : {index: 6, sign: -1, active: 0}, // z
+		88 : {index: 6, sign: 1, active: 0}, // x
+		67 : {index: 7, sign: -1, active: 0}, // c
+		86 : {index: 7, sign: 1, active: 0}, // v
+		66 : {index: 8, sign: -1, active: 0},  // b
+		78 : {index: 8, sign: 1, active: 0}, // n
+        77 : {index: 9, sign: -1, active: 0},  // m
+		188 : {index: 9, sign: 1, active: 0},  // ,
 
+		//R4 rotation commands
 		70 : {index: 10, sign: -1, active: 0},  // f
 		72 : {index: 10, sign: 1, active: 0}, // h
 		82 : {index: 11, sign: -1, active: 0},  // r
