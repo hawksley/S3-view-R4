@@ -103,7 +103,7 @@ function init() {
 // var resultingObj;
 function loadStuff() {
 
-  arraySize = 3;
+  arraySize = 2;
 
   hyperCubeArray = new Array(arraySize*arraySize*arraySize*arraySize);
   // hyperCubeArray = new Array(16);
@@ -124,10 +124,10 @@ function loadStuff() {
         if (child instanceof THREE.Mesh) {
           child.material = materialBase.clone();
           child.material.uniforms.objectPosn.value = new THREE.Vector4(
-            i%arraySize * 40,
-            Math.floor(i/arraySize)%arraySize * 40,
-            Math.floor(i/Math.pow(arraySize, 2))%arraySize * 40,
-            Math.floor(i/Math.pow(arraySize, 3))%arraySize * 40);
+            (i%arraySize - 0.5*(arraySize-1)) * 40,
+            (Math.floor(i/arraySize)%arraySize - 0.5*(arraySize-1)) * 40,
+            (Math.floor(i/Math.pow(arraySize, 2))%arraySize - 0.5*(arraySize-1)) * 40,
+            (Math.floor(i/Math.pow(arraySize, 3))%arraySize - 0.5*(arraySize-1)) * 40);
           child.material.uniforms.userPosn.value = globalUserPosn;
           child.material.uniforms.userOrientation.value = globalUserOrientation;
           child.frustumCulled = false;
