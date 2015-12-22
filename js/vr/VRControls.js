@@ -32,9 +32,11 @@ THREE.VRControls = function ( camera, speed, done ) {
 			} else if (self.isArrows && control.index <= 5) {
 				self.manualMoveRate[control.index - 3] += sign * control.sign;
 			} else if (control.index <= 9) {
-				self.manualR4MoveRate[control.index - 6] += sign * control.sign;
+				self.manualR4AbsoluteMoveRate[control.index - 6] += sign * control.sign;
 			} else if (control.index <= 12) {
 				self.manualR4RotateRate[control.index - 10] += sign * control.sign;
+			} else if (control.index <= 16) {
+				self.manualR4RelativeMoveRate[control.index - 13] += sign * control.sign;
 			}
 
 
@@ -133,7 +135,7 @@ THREE.VRControls = function ( camera, speed, done ) {
 		191 : {index: 5, sign: 1, active: 0}, // fwd slash
 		222 : {index: 5, sign: -1, active: 0},   // single quote
 
-		//R4 global position commands
+		//R4 absolute position commands
 		90 : {index: 6, sign: -1, active: 0}, // z
 		88 : {index: 6, sign: 1, active: 0}, // x
 		67 : {index: 7, sign: -1, active: 0}, // c
@@ -149,13 +151,18 @@ THREE.VRControls = function ( camera, speed, done ) {
 		82 : {index: 11, sign: -1, active: 0},  // r
 		89 : {index: 11, sign: 1, active: 0},  // y
 		84 : {index: 12, sign: -1, active: 0},  // t
-		71 : {index: 12, sign: 1, active: 0}  // g
+		71 : {index: 12, sign: 1, active: 0},  // g
+
+		//R4 position relative to orientation commands
+		75 : {index: 13, sign: -1, active: 0}, // k
+		73 : {index: 13, sign: 1, active: 0} // i
   };
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
 	this.manualMoveRate = new Float32Array([0, 0, 0]);
-	this.manualR4MoveRate = new Float32Array([0, 0, 0, 0]);
+	this.manualR4AbsoluteMoveRate = new Float32Array([0, 0, 0, 0]);
 	this.manualR4RotateRate = new Float32Array([0, 0, 0]); //only do 3 of 6 rotation dimensions in R4 
+	this.manualR4RelativeMoveRate = new Float32Array([0, 0, 0, 0]);
 
 	this.updateTime = 0;
 
@@ -247,12 +254,18 @@ THREE.VRControls = function ( camera, speed, done ) {
 			}
 
 			// why not use the same speed parameter for R4 as for R3, what could possibly go wrong?
-			globalUserPosn.x += interval * this.speed * this.manualR4MoveRate[0];
-			globalUserPosn.y += interval * this.speed * this.manualR4MoveRate[1];
-			globalUserPosn.z += interval * this.speed * this.manualR4MoveRate[2];
-			globalUserPosn.w += interval * this.speed * this.manualR4MoveRate[3];
+			globalUserPosn.x += interval * this.speed * this.manualR4AbsoluteMoveRate[0];
+			globalUserPosn.y += interval * this.speed * this.manualR4AbsoluteMoveRate[1];
+			globalUserPosn.z += interval * this.speed * this.manualR4AbsoluteMoveRate[2];
+			globalUserPosn.w += interval * this.speed * this.manualR4AbsoluteMoveRate[3];
 
-
+			/// here, do similar with manualR4RelativeMoveRate. Only using zeroth position for now, with i,k
+  			var R4forwardVector = new THREE.Vector4(0.0,0.0,1.0,0.0).applyMatrix4(globalUserOrientation); //gets first column
+  			// debugger;
+  			R4forwardVector.multiplyScalar(interval * this.speed * this.manualR4RelativeMoveRate[0]);
+  			// debugger;
+  			globalUserPosn.add(R4forwardVector);
+  			// debugger;
 		// }
 
 		if ( camera ) {
