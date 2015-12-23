@@ -99,6 +99,32 @@ uniform vec4 objectPosn; //location of object in R4
 uniform vec4 userPosn; //location of user is in R4
 uniform mat4 userOrientation; //rotation matrix of user in R4
 
+// hue, saturation, value (brightness)
+
+vec3 hsv_to_rgb(in vec3 hsv_vector)
+{
+    
+    float h = hsv_vector.x;
+    float s = hsv_vector.y;
+    float v = hsv_vector.z;
+    if (s == 0.0) { return vec3( v, v, v ); }
+    float fi = floor(h*6.0);
+    int i = int(fi); // XXX assume int() truncates!
+    float f = (h*6.0) - fi;
+
+    float p = clamp( v*(1.0 - s), 0.0, 1.0 );
+    float q = clamp( v*(1.0 - s*f), 0.0, 1.0 );
+    float t = clamp( v*(1.0 - s*(1.0-f)), 0.0, 1.0 );
+    v = clamp( v, 0.0, 1.0 );
+    if (i == 0 || i == 6) { return vec3( v, t, p ); }
+    else if (i == 1) { return vec3( q, v, p ); }
+    else if (i == 2){ return vec3( p, v, t ); }
+    else if (i == 3){ return vec3( p, q, v ); }
+    else if (i == 4){ return vec3( t, p, v ); }
+    else if (i == 5){ return vec3( v, p, q ); }
+    return vec3( 1.0, 1.0, 1.0);
+}
+
 // Hopf fibration coloring
 // returns a color based on the 4D normal
 vec3 HopfColor( in vec4 nBase )
@@ -175,22 +201,34 @@ void main()
     // just use the position vector as the normal vector, pretending that the cell has been radially projected
     // onto S3 for shading purposes. We ignore the normal coming from the 3D mesh
 
-    vColor = HopfColor(localR4posn);
+    // vColor = HopfColor(localR4posn);
 
     // fog: colour should drop off as the inverse cube of the distance from the user...
 
-    float dist = length( userRelativeR4posn ) ;
+    float dist3D = length( pos3 );
+    float dist4D = length( userRelativeR4posn );
+
+    vColor = hsv_to_rgb( vec3(mod(dist4D/100.0, 1.0), 1.0,1.0) );
 
     // float invCubeDist = 1.0/( dist*dist*dist ); // ...but this is probably way too fast a drop off in brightness
 
-    float fogOnDistance = 20.0; //full brightness before 20 units away from viewer in R4
+    float fogOnDistance3D = 1.0; //fade to white when near infinity in the retina, so we can see the opposite stuff
+    float fogScale3D = 1.0;
+    if( dist3D > fogOnDistance3D ){
+        fogScale3D = fogOnDistance3D/dist3D;
+    }
+
+    vColor = vColor * fogScale3D + vec3( 1.0,1.0,1.0 ) * (1.0-fogScale3D); 
+
+
+    float fogOnDistance4D = 30.0; //full brightness before 20 units away from viewer in R4
     //also changes how quickly the fog makes things darker
-    float fogScale = 1.0;
-    if( dist > fogOnDistance ){
-        fogScale = fogOnDistance/dist;
+    float fogScale4D = 1.0;
+    if( dist4D > fogOnDistance4D ){
+        fogScale4D = fogOnDistance4D/dist4D;
     }
     
-    vColor *= fogScale;
+    vColor *= fogScale4D;
 
     // take the final 3D position and project it onto the screen
     // gl_Position = projectionMatrix * modelViewMatrix * vec4( pos3 + vec3(0.0,-0.6,-1.5), 1.0 );

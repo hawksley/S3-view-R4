@@ -154,8 +154,8 @@ THREE.VRControls = function ( camera, speed, done ) {
 		71 : {index: 12, sign: 1, active: 0},  // g
 
 		//R4 position relative to orientation commands
-		75 : {index: 13, sign: -1, active: 0}, // k
-		73 : {index: 13, sign: 1, active: 0} // i
+		73 : {index: 13, sign: 1, active: 0}, // i
+		75 : {index: 13, sign: -1, active: 0} // k    //this makes i correspond to "forwards"
   };
 
 	this.manualRotateRate = new Float32Array([0, 0, 0]);
@@ -260,7 +260,9 @@ THREE.VRControls = function ( camera, speed, done ) {
 			globalUserPosn.w += interval * this.speed * this.manualR4AbsoluteMoveRate[3];
 
 			/// here, do similar with manualR4RelativeMoveRate. Only using zeroth position for now, with i,k
-  			var R4forwardVector = new THREE.Vector4(0.0,0.0,1.0,0.0).applyMatrix4(globalUserOrientation); //gets first column
+			var tempMatrix = new THREE.Matrix4();
+			tempMatrix.getInverse(globalUserOrientation);
+  			var R4forwardVector = new THREE.Vector4(0.0,0.0,0.0,-1.0).applyMatrix4(tempMatrix); //gets last column
   			// debugger;
   			R4forwardVector.multiplyScalar(interval * this.speed * this.manualR4RelativeMoveRate[0]);
   			// debugger;
