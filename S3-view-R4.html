@@ -170,16 +170,21 @@ void main()
     // float objectScale, is radius of the S3 this object is circumscribed in
     // vec4 userPosn, is where the user is in R4
 
-    vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
-    vec4 localR4posn = invStereoProj( R3posn ); //position on S3... 
-    //now we horribly hackily project points that are not vertices back to the hyperplanes they're supposed to be in
-    vec4 foo = abs(localR4posn);
+    // vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
+    // vec3 R3norm = 
 
-    float maxcoord = max(foo.x, max(foo.y, max(foo.z, foo.w)));
-    //rescale so that maxcoord is 1/2, which is what it is for hypercube inscribed in S3
-    //this gets combined with the objectScale in the next line
+    /// hack to get r4 vectors in via an obj file
+    vec4 localR4posn = vec4( position.zyx, normal.zyx.z);
 
-    vec4 scaledR4posn = (objectScale/(2.0*maxcoord)) * localR4posn;
+    // vec4 localR4posn = invStereoProj( R3posn ); //position on S3... 
+    // //now we horribly hackily project points that are not vertices back to the hyperplanes they're supposed to be in
+    // vec4 foo = abs(localR4posn);
+
+    // float maxcoord = max(foo.x, max(foo.y, max(foo.z, foo.w)));
+    // //rescale so that maxcoord is 1/2, which is what it is for hypercube inscribed in S3
+    // //this gets combined with the objectScale in the next line
+
+    vec4 scaledR4posn = objectScale * localR4posn;
 
     // will rotate the object here
 

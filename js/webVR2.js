@@ -75,7 +75,7 @@ function init() {
       },
       objectScale: {
         type: "f",
-        value: 10.0
+        value: 5.0
       },
       objectPosn: {
         type: "v4",
@@ -113,7 +113,8 @@ function loadStuff() {
   }
 
   // var modelFileName = "media/hypercube_2-skeleton_1.obj";
-  var modelFileName = "media/hypercube_2-skeleton_10.obj";
+  // var modelFileName = "media/hypercube_2-skeleton_10.obj";
+  var modelFileName = "media/hypercube_test_v2.obj";
   var manager = new THREE.LoadingManager();
   var loader = new THREE.OBJLoader(manager);
   loader.load(modelFileName, function (object) {
