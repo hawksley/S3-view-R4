@@ -129,6 +129,7 @@ function loadStuff() {
             (Math.floor(i/arraySize)%arraySize - 0.5*(arraySize-1)) * 40,
             (Math.floor(i/Math.pow(arraySize, 2))%arraySize - 0.5*(arraySize-1)) * 40,
             (Math.floor(i/Math.pow(arraySize, 3))%arraySize - 0.5*(arraySize-1)) * 40);
+          child.material.uniforms.objectScale.value = 5.0;
           child.material.uniforms.userPosn.value = globalUserPosn;
           child.material.uniforms.userOrientation.value = globalUserOrientation;
           child.frustumCulled = false;

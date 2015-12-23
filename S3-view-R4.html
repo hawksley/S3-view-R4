@@ -91,16 +91,13 @@ vec4 invStereoProj( in vec3 p )
 
 // input
 // uniform float time; // global time in seconds
-// uniform int fogType; // which type of fog to use
-// uniform vec2 mousePos;
 
 uniform float objectScale; //scale object by this
 uniform vec4 objectPosn; //location of object in R4
-uniform vec4 userPosn; //location of user is in R4
+uniform vec4 userPosn; //location of user in R4
 uniform mat4 userOrientation; //rotation matrix of user in R4
 
 // hue, saturation, value (brightness)
-
 vec3 hsv_to_rgb(in vec3 hsv_vector)
 {
     
@@ -161,38 +158,26 @@ vec3 HopfColor( in vec4 nBase )
 // output
 varying vec3 vColor; // this shader computes the color of each vertex
 
-// this gets called once per vertex of the monkey mesh (and numCells times since there are numCells monkeys)
+// this gets called once per vertex of the mesh, per copy of the mesh
 void main()
 {
     // inputs:
-    // vec3 position, is position of the vertex on the mesh in R3
-    // vec4 objectPosn, is how object is moved
-    // float objectScale, is radius of the S3 this object is circumscribed in
+    // vec3 position.zyx, is position of the vertex on the mesh in R3
+    // vec3 normal.zyx, normal for the vertex on the mesh in R3
+
+    // vec4 objectPosn, is object position in R4
+    // float objectScale, is amount object is scaled by
     // vec4 userPosn, is where the user is in R4
 
-    // vec3 R3posn = position.zyx;    // position of the vertex on the mesh in R3
-    // vec3 R3norm = 
-
     /// hack to get r4 vectors in via an obj file
-    vec4 localR4posn = vec4( position.zyx, normal.zyx.z);
-
-    // vec4 localR4posn = invStereoProj( R3posn ); //position on S3... 
-    // //now we horribly hackily project points that are not vertices back to the hyperplanes they're supposed to be in
-    // vec4 foo = abs(localR4posn);
-
-    // float maxcoord = max(foo.x, max(foo.y, max(foo.z, foo.w)));
-    // //rescale so that maxcoord is 1/2, which is what it is for hypercube inscribed in S3
-    // //this gets combined with the objectScale in the next line
+    vec4 localR4posn = vec4( position.zyx, normal.zyx.z);  //ignore other two coordinates of the normal vector
 
     vec4 scaledR4posn = objectScale * localR4posn;
 
-    // will rotate the object here
-
     vec4 globalR4posn = scaledR4posn + objectPosn;
 
-    // will modify by rotation of the user here
     // userOrientation is perhaps the inverse of what you might think it is, don't want to
-    // be doing matrix inverses if we don't have to...
+    // be doing matrix inverses here if we don't have to...
 
     vec4 userRelativeR4posn = userOrientation * (globalR4posn - userPosn);
 
@@ -202,22 +187,20 @@ void main()
     // 2D faces, which are codimension 2 in R4. It isn't clear that these should even have colours in
     // R4, given that they are eventually measure zero in S3. The 3D cells of a polychoron should have
     // colour, but the 2D cells between 3D cells shouldn't. We have to do something though. Perhaps
-    // the correct thing to do is average the colours of the two neighbouring 3D cells. But for now, let's
-    // just use the position vector as the normal vector, pretending that the cell has been radially projected
-    // onto S3 for shading purposes. We ignore the normal coming from the 3D mesh
+    // the correct thing to do is average the colours of the two neighbouring 3D cells. 
 
-    // vColor = HopfColor(localR4posn);
-
-    // fog: colour should drop off as the inverse cube of the distance from the user...
+    // For now, distance from user position in R4 is colour coded. This is difficult enough to interpret, that
+    // using colour is a good idea.
 
     float dist3D = length( pos3 );
     float dist4D = length( userRelativeR4posn );
 
     vColor = hsv_to_rgb( vec3(mod(dist4D/100.0, 1.0), 1.0,1.0) );
 
+    // fog: colour should drop off as the inverse cube of the distance from the user...
     // float invCubeDist = 1.0/( dist*dist*dist ); // ...but this is probably way too fast a drop off in brightness
 
-    float fogOnDistance3D = 1.0; //fade to white when near infinity in the retina, so we can see the opposite stuff
+    float fogOnDistance3D = 1.0; //fade to white when near infinity in the retina, another visual cue
     float fogScale3D = 1.0;
     if( dist3D > fogOnDistance3D ){
         fogScale3D = fogOnDistance3D/dist3D;
@@ -226,7 +209,7 @@ void main()
     vColor = vColor * fogScale3D + vec3( 1.0,1.0,1.0 ) * (1.0-fogScale3D); 
 
 
-    float fogOnDistance4D = 30.0; //full brightness before 20 units away from viewer in R4
+    float fogOnDistance4D = 30.0; //full brightness before this number of units away from viewer in R4
     //also changes how quickly the fog makes things darker
     float fogScale4D = 1.0;
     if( dist4D > fogOnDistance4D ){
