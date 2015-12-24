@@ -180,7 +180,9 @@ void main()
     // be doing matrix inverses here if we don't have to...
 
     // vec4 userRelativeR4posn = userOrientation * (globalR4posn - vec4 (10.0,0.0,0.0,20.0));
-    vec4 userRelativeR4posn = userOrientation * (globalR4posn - userPosn);
+    // vec4 userRelativeR4posn = userOrientation * (globalR4posn - userPosn); // in this version, you rotate the S3 projection point
+
+    vec4 userRelativeR4posn = (userOrientation * globalR4posn) - userPosn;  // here, we actually rotate the 4d object
 
     vec3 pos3 = stereoProj( normalize( userRelativeR4posn ) ); // position in retina space
 
